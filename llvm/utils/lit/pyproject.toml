@@ -1,3 +1,42 @@
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "lit"
+description = "A Software Testing Tool"
+readme = "README.rst"
+license = {text = "Apache-2.0 WITH LLVM-exception"}
+license-files = ["LICENSE.TXT"]
+authors = [
+    {name = "Daniel Dunbar", email = "daniel@minormatter.com"}
+]
+keywords = ["test", "C++", "automatic", "discovery"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Software Development :: Testing",
+]
+dynamic = ["version"] # Should this try to pull from `import lit; lit.__version__`? What about __author__ and __email__?
+# Those other dunders aren't recognized as modern best practices https://github.com/pyscaffold/pyscaffold/issues/162
+
+[project.urls]
+Homepage = "https://llvm.org/"
+Documentation = "https://llvm.org/docs/CommandGuide/lit.html"
+Discussions = "https://discourse.llvm.org/"
+"Issue Tracker" = "https://github.com/llvm/llvm-project/labels/tools%3Allvm-lit"
+"Source Code" = "https://github.com/llvm/llvm-project/tree/main/llvm/utils/lit"
+
+[project.scripts]
+lit = "lit.main:main"
+
+[tool.setuptools_scm]
+root = "../../.."
+version_file = "lit/_version.py"
+version_scheme = "no-guess-dev"
+# Regex version capture group gets x.y.z with optional -rcN, -aN, -bN suffixes; -init is just consumed
+tag_regex = "^llvmorg-(?P<version>\\d+(?:\\.\\d+)*(?:-rc\\d+)?)(?:.*)$"
