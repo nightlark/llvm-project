@@ -10,6 +10,14 @@ on:
         description: 'Release Version'
         required: true
         type: string
+      # dry-run:
+      #   description: 'Dry run of lit package release, without uploading to PyPI'
+      #   required: false
+      #   type: boolean
+      save-artifact:
+        description: 'Save lit package as an artifact'
+        required: false
+        type: boolean
 
   workflow_call:
     inputs:
@@ -17,6 +25,10 @@ on:
         description: 'Release Version'
         required: true
         type: string
+      dry-run:
+        description: 'Dry run of lit package release, without uploading to PyPI'
+        required: false
+        type: boolean
     secrets:
       RELEASE_TASKS_USER_TOKEN:
         description: "Secret used to check user permissions."
@@ -38,6 +50,7 @@ jobs:
           sudo apt-get install -y python3-setuptools python3-psutil python3-github
 
       - name: Check Permissions
+        if: github.repository_owner == 'llvm'
         env:
           GITHUB_TOKEN: ${{ github.token }}
           USER_TOKEN: ${{ secrets.RELEASE_TASKS_USER_TOKEN }}
@@ -47,7 +60,7 @@ jobs:
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
-          compiler: llvm-16.0.6
+          compiler: llvm-19.1.7
           cmake: true
           ninja: true
 
@@ -65,7 +78,15 @@ jobs:
           sed -i 's/ + "dev"//g' lit/__init__.py
           python3 setup.py sdist bdist_wheel
 
+      - name: Save lit package as an artifact
+        if: inputs.save-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lit-artifact
+          path: llvm/utils/lit/dist/
+
       - name: Upload lit to test.pypi.org
+        if: github.repository_owner == 'llvm' && inputs.dry-run == 'false'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.LLVM_LIT_TEST_PYPI_API_TOKEN }}
@@ -73,6 +94,7 @@ jobs:
           packages-dir: llvm/utils/lit/dist/
 
       - name: Upload lit to pypi.org
+        if: github.repository_owner == 'llvm' && inputs.dry-run == 'false'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.LLVM_LIT_PYPI_API_TOKEN }}
