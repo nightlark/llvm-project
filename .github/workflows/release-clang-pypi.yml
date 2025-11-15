@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build-release
     # Only run this job in the main llvm repository when a release version is provided.
-    if: github.repository_owner == 'llvm' && inputs.release-version != ''
+    if: inputs.release-version != ''
     environment:
       name: pypi
       url: https://pypi.org/p/clang
